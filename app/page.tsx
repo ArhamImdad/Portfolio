@@ -270,7 +270,7 @@ export default function Home() {
 
                 <div className="flex justify-center pt-6">
                   <Button asChild>
-                    <a href="/resume.pdf" download>
+                    <a href="/Resume.pdf" download>
                       <Download className="mr-2 h-4 w-4" />
                       Download Full Resume
                     </a>
