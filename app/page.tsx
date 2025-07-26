@@ -113,7 +113,7 @@ export default function Home() {
               Contact
             </button>
             <Button asChild size="sm">
-              <a href="/resume.pdf" download>
+              <a href="/Resume.pdf" download>
                 <Download className="mr-2 h-4 w-4" />
                 Resume
               </a>
