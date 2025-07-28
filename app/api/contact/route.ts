@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server"
+import { resend } from "@/lib/resend"
+import { EmailTemplate } from "@/components/email-template"
 
 export async function POST(request: Request) {
   try {
@@ -10,31 +12,44 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
-    // In a real implementation, you would send an email here
-    // For example, using a service like SendGrid, Mailgun, or AWS SES
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      return NextResponse.json({ error: "Invalid email format" }, { status: 400 })
+    }
 
-    // Example code for sending email (commented out)
-    /*
-    const emailData = {
-      to: "arham.imdad14@gmail.com",
-      from: "your-verified-sender@example.com",
-      subject: `New message from ${name}`,
+    // Send email using Resend
+       const { data, error } = await resend.emails.send({
+      from: "Portfolio Contact <onboarding@resend.dev>",
+      to: ["arham.imdad14@gmail.com"],
+      replyTo: email,
+      subject: `New Contact Form Submission from ${name}`,
+      react: await EmailTemplate({ name, email, message }), // <--- Fix here
       text: `
+        New contact form submission:
+        
         Name: ${name}
         Email: ${email}
         
         Message:
         ${message}
       `,
-    }
-    
-    await sendEmail(emailData)
-    */
+    })
 
-    // For now, we'll just return a success response
-    return NextResponse.json({ success: true })
+
+    if (error) {
+      console.error("Resend error:", error)
+      return NextResponse.json({ error: "Failed to send email" }, { status: 500 })
+    }
+
+    console.log("Email sent successfully:", data)
+    return NextResponse.json({
+      success: true,
+      message: "Email sent successfully",
+      emailId: data?.id,
+    })
   } catch (error) {
     console.error("Error in contact form submission:", error)
-    return NextResponse.json({ error: "Failed to send message" }, { status: 500 })
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

@@ -45,12 +45,26 @@ export default function Home() {
     setIsSubmitting(true)
 
     try {
-      // In a real implementation, you would send this data to your backend
-      // For now, we'll simulate a successful submission
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim(),
+          message: message.trim(),
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || "Something went wrong")
+      }
 
       toast({
-        title: "Message sent!",
+        title: "Message sent successfully!",
         description: "Thank you for reaching out. I'll get back to you soon.",
       })
 
@@ -59,9 +73,10 @@ export default function Home() {
       setEmail("")
       setMessage("")
     } catch (error) {
+      console.error("Contact form error:", error)
       toast({
-        title: "Something went wrong",
-        description: "Your message couldn't be sent. Please try again.",
+        title: "Failed to send message",
+        description: error instanceof Error ? error.message : "Please try again later.",
         variant: "destructive",
       })
     } finally {
@@ -142,7 +157,7 @@ export default function Home() {
               Contact
             </button>
             <Button asChild size="sm" className="w-full">
-              <a href="/resume.pdf" download>
+              <a href="/Resume.pdf" download>
                 <Download className="mr-2 h-4 w-4" />
                 Resume
               </a>
@@ -173,13 +188,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="relative w-64 h-64 md:w-80 md:h-80 rounded-full overflow-hidden border-4 border-primary/20">
-                <Image
-                  src="/PIC.jpg"
-                  alt="Arham Imdad"
-                  fill
-                  className="object-cover"
-                  priority
-                />
+                <Image src="/PIC.jpg" alt="Arham Imdad" fill className="object-cover" priority />
               </div>
             </div>
           </div>
@@ -362,9 +371,7 @@ export default function Home() {
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="text-xl font-bold">Vue.js Web Application</h3>
                       <div className="flex gap-2">
-                        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
-                          Project
-                        </span>
+                        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full">Project</span>
                         <Button asChild variant="outline" size="sm">
                           <a
                             href="https://github.com/TalhahaRana/MI_HRM/tree/dev"
@@ -417,9 +424,7 @@ export default function Home() {
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="text-xl font-bold">React.js Application</h3>
                       <div className="flex gap-2">
-                        <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full">
-                          Live
-                        </span>
+                        <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full">Live</span>
                         <Button asChild size="sm">
                           <a
                             href="https://apps.shopify.com/partners/xstak"
@@ -468,9 +473,6 @@ export default function Home() {
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="text-xl font-bold">MERN Stack Application</h3>
                       <div className="flex gap-2">
-                        {/* <span className="px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded-full">
-                          Internship
-                        </span> */}
                         <Button asChild size="sm">
                           <a
                             href="https://www.ebryx.com/"
@@ -510,7 +512,7 @@ export default function Home() {
                 <div className="group relative overflow-hidden rounded-lg border bg-card">
                   <div className="relative aspect-[16/10] overflow-hidden bg-muted">
                     <Image
-                      src="/placeholder.svg?height=300&width=480&text=Personal+Project"
+                      src="/Portfolio.png?height=300&width=480&text=Personal+Project"
                       alt="Personal Learning Project"
                       width={480}
                       height={300}
@@ -523,7 +525,7 @@ export default function Home() {
                       <div className="flex gap-2">
                         <Button asChild variant="outline" size="sm">
                           <a
-                            href="https://github.com/arham-imdad"
+                            href="https://github.com/ArhamImdad/Portfolio"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center"
@@ -535,7 +537,8 @@ export default function Home() {
                           </a>
                         </Button>
                         <Button asChild size="sm">
-                          <a href="#" className="flex items-center">
+                          <a href="https://portfolio-arham-imdad.vercel.app/"  target="_blank"
+                            rel="noopener noreferrer" className="flex items-center">
                             <ExternalLink className="h-4 w-4 mr-1" />
                             Live
                           </a>
@@ -639,7 +642,7 @@ export default function Home() {
                 <div className="mt-8">
                   <Button asChild size="lg">
                     <a
-                      href="https://github.com/arham-imdad"
+                      href="https://github.com/ArhamImdad"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center"
@@ -696,7 +699,7 @@ export default function Home() {
                     </Button>
                     <Button asChild variant="outline" size="icon">
                       <a
-                        href="https://github.com/arham-imdad"
+                        href="https://github.com/ArhamImdad"
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label="GitHub Profile"
@@ -729,7 +732,7 @@ export default function Home() {
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                       <label htmlFor="name" className="block text-sm font-medium mb-1">
-                        Name
+                        Name *
                       </label>
                       <Input
                         id="name"
@@ -737,11 +740,12 @@ export default function Home() {
                         onChange={(e) => setName(e.target.value)}
                         placeholder="Your name"
                         required
+                        disabled={isSubmitting}
                       />
                     </div>
                     <div>
                       <label htmlFor="email" className="block text-sm font-medium mb-1">
-                        Email
+                        Email *
                       </label>
                       <Input
                         id="email"
@@ -750,11 +754,12 @@ export default function Home() {
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="Your email"
                         required
+                        disabled={isSubmitting}
                       />
                     </div>
                     <div>
                       <label htmlFor="message" className="block text-sm font-medium mb-1">
-                        Message
+                        Message *
                       </label>
                       <Textarea
                         id="message"
@@ -763,6 +768,7 @@ export default function Home() {
                         placeholder="Your message"
                         rows={4}
                         required
+                        disabled={isSubmitting}
                       />
                     </div>
                     <Button type="submit" className="w-full" disabled={isSubmitting}>
@@ -822,7 +828,7 @@ export default function Home() {
                 LinkedIn
               </a>
               <a
-                href="https://github.com/arham-imdad"
+                href="https://github.com/ArhamImdad"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-primary"
